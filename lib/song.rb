@@ -49,4 +49,45 @@ class Song
     song.save
   end
 
+  def self.new_from_db(row)
+    # self.new is equivalent to Song.new
+    # reading data from SQLite and temporarily representing in ruby
+    self.new(id: row[0], name: row[1], album: row[2])
+  end
+
+  def self.all 
+    # this will return an array of rows from 
+    # db that matches our query.
+    sql = <<-SQL
+      SELECT * FROM songs
+    SQL
+    # iterate over each row and using the self.map
+    # method to create a new Ruby object for each row
+    DB[:conn].execute(sql).map do |row|
+      self.new_from_db(row)
+    end
+  end
+  
+    # Song.find_by_name
+    # this will return an array of rows from 
+    # db that matches our query.
+    # we have to include a name in our SQL statement
+    # this is by using question mark where we want the name parameter
+    # to be passed in
+    def self.find_by_name(name)
+      sql = <<-SQL
+        SELECT * FROM songs
+        WHERE name = ?
+        LIMIT 1
+      SQL
+
+      # iterate over each row and using the self.map
+      # map will return an array, then grab the first elem 
+      # from the returned aray - Chaining
+      DB[:conn].execute(sql,name).map do |row|
+        self.new_from_db(row)
+      end.first
+    end    
+      # 
+
 end
